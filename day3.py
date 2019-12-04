@@ -54,6 +54,20 @@ def manhattan_distance(path1, path2):
     return min(distances)
 
 
+def least_shared_steps(path1, path2):
+    """Return the smallest shared steps before intersection between two paths."""
+    # Convert each path into a list of locations it passed through
+    trail1 = path_to_trail(path1)
+    trail2 = path_to_trail(path2)
+
+    # Find all locations that exist in each trail
+    collisions = set(trail1) & set(trail2)
+    # Origin does not count as an intersection
+    collisions -= {(0, 0)}
+
+    return min(trail1.index(c) + trail2.index(c) for c in collisions)
+
+
 def test():
     path1 = ["R75","D30","R83","U83","L12","D49","R71","U7","L72"]
     path2 = ["U62","R66","U55","R34","D71","R55","D58","R83"]
@@ -63,13 +77,21 @@ def test():
     path2 = ["U98","R91","D20","R16","D67","R40","U7","R15","U6","R7"]
     assert manhattan_distance(path1, path2) == 135
 
+    path1 = ["R75","D30","R83","U83","L12","D49","R71","U7","L72",]
+    path2 = ["U62","R66","U55","R34","D71","R55","D58","R83",]
+    assert least_shared_steps(path1, path2) == 610
+
+    path1 = ["R98","U47","R26","D63","R33","U87","L62","D20","R33","U53","R51",]
+    path2 = ["U98","R91","D20","R16","D67","R40","U7","R15","U6","R7",]
+    assert least_shared_steps(path1, path2) == 410
+
 
 def main():
     # Convert text input into two lists of wire paths
     with open("data/day3.txt", "r") as file:
         paths = [path.strip().split(",") for path in file.readlines()]
-    distance = manhattan_distance(*paths)
-    print(f"closest manhattan distance is: {distance}")
+    lss = least_shared_steps(*paths)
+    print(f"least shared steps is: {lss}")
 
 
 if __name__ == "__main__":
