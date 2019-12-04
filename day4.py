@@ -7,22 +7,31 @@ PUZZLE_INPUT = "367479-893698"
 
 def maybe_valid_password(number):
     """Return True if a number is a potentially valid password."""
+    # Track the count of times numbers repeat
+    count_repeatings = []
     digits = str(number)
-    repeating_numbers = False
+
+    count_repeatings += [1]
     previous = digits[0]
     for current in digits[1:]:
+        # Digits in password must never decrease
         if current < previous:
             return False
+
         if current == previous:
-            repeating_numbers = True
+            count_repeatings[-1] += 1
+        else:
+            count_repeatings += [1]
+
         previous = current
-    return repeating_numbers
+
+    return (2 in count_repeatings)
 
 
 def test():
-    assert maybe_valid_password(111111)
-    assert not maybe_valid_password(223450)
-    assert not maybe_valid_password(123789)
+    assert maybe_valid_password(112233)
+    assert not maybe_valid_password(123444)
+    assert maybe_valid_password(111122)
 
 
 def main():
