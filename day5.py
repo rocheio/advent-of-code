@@ -29,6 +29,8 @@ def process(program, inputval=None):
     outputval = None
     index = 0
     while index < len(program):
+        print(index, program)
+
         # parse opcode and parameter mode(s) from instruction
         # (convert integer into 5-digit string with zeroes before parsing)
         instruction = str(program[index]).zfill(5)
@@ -61,26 +63,79 @@ def process(program, inputval=None):
         if opcode == 3:
             dest = getvalue(program, index+1, IMMEDIATE_MODE)
             program[dest] = inputval
+
             index += 2
             continue
 
         # opcode for output
         if opcode == 4:
             outputval = getvalue(program, index+1, param1_mode)
+
             index += 2
+            continue
+
+        # opcodes for jump-if-true / jump-if-false
+        if opcode in (5, 6):
+            val1 = getvalue(program, index+1, param1_mode)
+            val2 = getvalue(program, index+2, param2_mode)
+
+            # Should jump; update current instruction and restart it
+            if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
+                program[index] = val2
+                continue
+
+            # No action, continue to next instruction
+            index += 3
+            continue
+
+        # opcode for less than / equal to
+        if opcode in (7, 8):
+            val1 = getvalue(program, index+1, param1_mode)
+            val2 = getvalue(program, index+2, param2_mode)
+            dest = getvalue(program, index+3, IMMEDIATE_MODE)
+
+            # Default 0 (False), set to 1 if True
+            program[dest] = 0
+            if opcode == 7 and val1 < val2:
+                program[dest] = 1
+            elif opcode == 8 and val1 == val2:
+                program[dest] = 1
+
+            index += 4
             continue
 
         raise Exception("unknown opcode, something went wrong")
 
 
 def test():
+    # programs defined by question
+    # programs that return 1 if true, 0 if false
+    equal_8 = [3,9,8,9,10,9,4,9,99,-1,8]
+    less_than_8 = [3,9,7,9,10,9,4,9,99,-1,8]
+    equal_8_imm_mode = [3,3,1108,-1,8,3,4,3,99]
+    less_than_8_imm_mode = [3,3,1107,-1,8,3,4,3,99]
+    # programs that return 0 if input is 0, 1 otherwise
+    nonzero = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
+    nonzero_imm_mode = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
+
+    # test cases
     testcases = [
-        ([1002,4,3,4,33],[1002,4,3,4,99]),
-        ([1101,100,-1,4,0],[1101,100,-1,4,99]),
+        # (equal_8, 8, 1),
+        # (equal_8, 9, 0),
+        # (less_than_8, 7, 1),
+        # (less_than_8, 9, 0),
+        # (equal_8_imm_mode, 8, 1),
+        # (equal_8_imm_mode, 9, 0),
+        # (less_than_8_imm_mode, 7, 1),
+        # (less_than_8_imm_mode, 9, 0),
+        # (nonzero, 9, 1),
+        (nonzero, 0, 0),
+        # (nonzero_imm_mode, 9, 1),
+        # (nonzero_imm_mode, 0, 0),
     ]
-    for program, expected in testcases:
-        process(program)
-        assert program == expected
+    for program, inputval, expected in testcases:
+        outputval = process(deepcopy(program), inputval)
+        assert outputval == expected
 
 
 def main():
@@ -95,4 +150,3 @@ def main():
 if __name__ == "__main__":
     test()
     main()
-
