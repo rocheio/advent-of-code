@@ -29,8 +29,6 @@ def process(program, inputval=None):
     outputval = None
     index = 0
     while index < len(program):
-        print(index, program)
-
         # parse opcode and parameter mode(s) from instruction
         # (convert integer into 5-digit string with zeroes before parsing)
         instruction = str(program[index]).zfill(5)
@@ -79,9 +77,9 @@ def process(program, inputval=None):
             val1 = getvalue(program, index+1, param1_mode)
             val2 = getvalue(program, index+2, param2_mode)
 
-            # Should jump; update current instruction and restart it
+            # Should jump; update instruction pointer directly
             if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
-                program[index] = val2
+                index = val2
                 continue
 
             # No action, continue to next instruction
@@ -117,21 +115,30 @@ def test():
     # programs that return 0 if input is 0, 1 otherwise
     nonzero = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
     nonzero_imm_mode = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
+    # big program for <8, =8, or >8
+    compare_to_8 = [
+        3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
+        1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
+        999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99
+    ]
 
     # test cases
     testcases = [
-        # (equal_8, 8, 1),
-        # (equal_8, 9, 0),
-        # (less_than_8, 7, 1),
-        # (less_than_8, 9, 0),
-        # (equal_8_imm_mode, 8, 1),
-        # (equal_8_imm_mode, 9, 0),
-        # (less_than_8_imm_mode, 7, 1),
-        # (less_than_8_imm_mode, 9, 0),
-        # (nonzero, 9, 1),
+        (equal_8, 8, 1),
+        (equal_8, 9, 0),
+        (less_than_8, 7, 1),
+        (less_than_8, 9, 0),
+        (equal_8_imm_mode, 8, 1),
+        (equal_8_imm_mode, 9, 0),
+        (less_than_8_imm_mode, 7, 1),
+        (less_than_8_imm_mode, 9, 0),
+        (nonzero, 9, 1),
         (nonzero, 0, 0),
-        # (nonzero_imm_mode, 9, 1),
-        # (nonzero_imm_mode, 0, 0),
+        (nonzero_imm_mode, 9, 1),
+        (nonzero_imm_mode, 0, 0),
+        (compare_to_8, 7, 999),
+        (compare_to_8, 8, 1000),
+        (compare_to_8, 9, 1001),
     ]
     for program, inputval, expected in testcases:
         outputval = process(deepcopy(program), inputval)
@@ -143,7 +150,8 @@ def main():
     with open("data/day5.txt", "r") as file:
         text = file.read().strip()
     program = [int(number) for number in text.split(',')]
-    output = process(program, inputval=1)
+
+    output = process(program, inputval=5)
     print(f"answer is: {output}")
 
 
