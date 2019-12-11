@@ -17,6 +17,7 @@ class Amplifier:
         self.program = deepcopy(program)
         self.inputs = []
         self.halted = False
+        self.index = 0
 
     def getvalue(self, index, mode=POSITION_MODE):
         """Return a value from a program by index based on the mode.
@@ -34,12 +35,10 @@ class Amplifier:
         Uses the `inputs` attribute to support Opcode 3.
             - Each encounter of opcode 3 will remove an element from the inputs
         """
-        print(self.inputs)
-        index = 0
-        while index < len(self.program):
+        while self.index < len(self.program):
             # parse opcode and parameter mode(s) from instruction
             # (convert integer into 5-digit string with zeroes before parsing)
-            instruction = str(self.program[index]).zfill(5)
+            instruction = str(self.program[self.index]).zfill(5)
             opcode = int(instruction[-2:])
             param1_mode = int(instruction[-3])
             param2_mode = int(instruction[-4])
@@ -50,53 +49,55 @@ class Amplifier:
             # opcode to halt program
             if opcode == 99:
                 self.halted = True
-                return outputval
+                return
 
             # opcodes for addition or multiplication
             if opcode in (1, 2):
-                val1 = self.getvalue(index+1, param1_mode)
-                val2 = self.getvalue(index+2, param2_mode)
-                dest = self.getvalue(index+3, IMMEDIATE_MODE)
+                val1 = self.getvalue(self.index+1, param1_mode)
+                val2 = self.getvalue(self.index+2, param2_mode)
+                dest = self.getvalue(self.index+3, IMMEDIATE_MODE)
 
                 if opcode == 1:
                     self.program[dest] = val1 + val2
                 elif opcode == 2:
                     self.program[dest] = val1 * val2
 
-                index += 4
+                self.index += 4
                 continue
 
             # opcode for input
             if opcode == 3:
-                dest = self.getvalue(index+1, IMMEDIATE_MODE)
+                dest = self.getvalue(self.index+1, IMMEDIATE_MODE)
                 self.program[dest] = self.inputs.pop(0)
 
-                index += 2
+                self.index += 2
                 continue
 
             # opcode for output
             if opcode == 4:
-                return self.getvalue(index+1, param1_mode)
+                value = self.getvalue(self.index+1, param1_mode)
+                self.index += 2
+                return value
 
             # opcodes for jump-if-true / jump-if-false
             if opcode in (5, 6):
-                val1 = self.getvalue(index+1, param1_mode)
-                val2 = self.getvalue(index+2, param2_mode)
+                val1 = self.getvalue(self.index+1, param1_mode)
+                val2 = self.getvalue(self.index+2, param2_mode)
 
                 # Should jump; update instruction pointer directly
                 if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
-                    index = val2
+                    self.index = val2
                     continue
 
                 # No action, continue to next instruction
-                index += 3
+                self.index += 3
                 continue
 
             # opcode for less than / equal to
             if opcode in (7, 8):
-                val1 = self.getvalue(index+1, param1_mode)
-                val2 = self.getvalue(index+2, param2_mode)
-                dest = self.getvalue(index+3, IMMEDIATE_MODE)
+                val1 = self.getvalue(self.index+1, param1_mode)
+                val2 = self.getvalue(self.index+2, param2_mode)
+                dest = self.getvalue(self.index+3, IMMEDIATE_MODE)
 
                 # Default 0 (False), set to 1 if True
                 self.program[dest] = 0
@@ -105,7 +106,7 @@ class Amplifier:
                 elif opcode == 8 and val1 == val2:
                     self.program[dest] = 1
 
-                index += 4
+                self.index += 4
                 continue
 
             raise Exception("unknown opcode, something went wrong")
@@ -139,8 +140,11 @@ def thruster_signal(program, phase_settings):
             if amp.halted:
                 continue
             amp.inputs += [value]
-            value = amp.process()
-    return inputval
+            newvalue = amp.process()
+            if newvalue is not None:
+                value = newvalue
+
+    return value
 
 
 def test():
@@ -152,6 +156,16 @@ def test():
     max_signal = thruster_signal(program, best)
     assert best == (9,8,7,6,5)
     assert max_signal == 139629729
+
+    program = [
+        3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,
+        -5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,
+        53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
+    ]
+    best = best_phase_settings(program)
+    max_signal = thruster_signal(program, best)
+    assert best == (9,7,8,5,6)
+    assert max_signal == 18216
 
 
 def main():
