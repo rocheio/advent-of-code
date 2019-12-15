@@ -52,7 +52,7 @@ class Computer:
         outputs = []
 
         # Prevent infinite loop programs / bugs while developing
-        for _ in range(100000):
+        while True:
             # parse opcode and parameter mode(s) from instruction
             # (convert integer into 5-digit string with zeroes before parsing)
             instruction = str(self.program[self.index]).zfill(5)
@@ -129,8 +129,6 @@ class Computer:
 
             raise Exception("unknown opcode, something went wrong")
 
-        raise Exception("infinite loop encountered")
-
 
 def test():
     program = [3,9,8,9,10,9,4,9,99,-1,8]
@@ -158,10 +156,10 @@ def main():
     program = [int(number) for number in text.split(',')]
 
     computer = Computer(program)
-    computer.inputs += [1]
+    computer.inputs += [2]
     output = computer.process()
 
-    print(f"BOOST keycode is: {output}")
+    print(f"Distress signal is at: {output}")
 
 
 if __name__ == "__main__":
