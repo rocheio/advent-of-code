@@ -160,9 +160,8 @@ def run_robot(program):
     position = (0, 0)
     direction = 90
     computer = Computer(program)
+    current_color = COLOR_WHITE
     while not computer.halted:
-        current_color = grid[position]
-
         computer.inputs += [current_color]
         # Run program until two outputs are generated
         while len(computer.outputs) != 2:
@@ -188,6 +187,27 @@ def run_robot(program):
         x = round(math.cos(math.radians(direction)))
         y = round(math.sin(math.radians(direction)))
         position = (position[0]+x, position[1]+y)
+        current_color = grid[position]
+
+
+def print_grid(grid):
+    """Print a map of (x, y) -> color to the console."""
+    # Calculate offsets for printing potentially negative range
+    min_x = min(grid, key=lambda item: item[0])[0]
+    min_y = min(grid, key=lambda item: item[1])[1]
+    max_x = max(grid, key=lambda item: item[0])[0]
+    max_y = max(grid, key=lambda item: item[1])[1]
+
+    # Loop over grid adjusting for flipped Y perspective
+    for y in range(max_y, min_y-1, -1):
+        row = ""
+        for x in range(min_x, max_x+1):
+            color = grid[(x, y)]
+            if color == COLOR_BLACK:
+                row += " "
+            else:
+                row += "X"
+        print(row)
 
 
 def test():
@@ -215,7 +235,7 @@ def main():
         text = file.read().strip()
     program = [int(number) for number in text.split(',')]
     grid = run_robot(program)
-    print(f"number of pixels painted: {len(grid)}")
+    print_grid(grid)
 
 
 if __name__ == "__main__":
