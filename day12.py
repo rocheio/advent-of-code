@@ -2,7 +2,6 @@
 https://adventofcode.com/2019/day/12
 """
 
-from collections import namedtuple
 from itertools import combinations
 import re
 from typing import List
@@ -39,6 +38,9 @@ class Point:
         self.z += o.z
         return self
 
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
+
     def sumabs(self):
         return sum((abs(self.x), abs(self.y), abs(self.z)))
 
@@ -55,6 +57,9 @@ class Body:
 
     def __eq__(self, o):
         return self.position == o.position and self.velocity == o.velocity
+
+    def __hash__(self):
+        return hash((self.position, self.velocity))
 
     def total_energy(self):
         return self.position.sumabs() * self.velocity.sumabs()
@@ -104,6 +109,16 @@ class Simulation:
     def total_energy(self):
         """Return the total energy in the system."""
         return sum(body.total_energy() for body in self.bodies)
+
+    def steps_until_repeat(self):
+        """Find the first step that repeats any previous step."""
+        start = hash(tuple(self.bodies))
+        index = 0
+        while True:
+            self.step()
+            index += 1
+            if hash(tuple(self.bodies)) == start:
+                return index
 
 
 def parse_ints(text: str) -> List[int]:
@@ -180,6 +195,10 @@ def test1():
     """)
     assert sim.bodies == want
 
+    # Can calculate the first repeating state from scratch
+    sim = Simulation(starts)
+    assert sim.steps_until_repeat() == 2772
+
 
 def test2():
     starts = parse_start_positions("""
@@ -220,12 +239,16 @@ def test2():
     assert sim.bodies == want
     assert sim.total_energy() == 1940
 
+    # Can calculate the first repeating state from scratch
+    sim = Simulation(starts)
+    assert sim.steps_until_repeat() == 4686774924
+
 
 def main():
     starts = parse_start_positions(INPUT)
     sim = Simulation(starts)
-    sim.stepn(1000)
-    print(f"total energy in system after 1000 steps is: {sim.total_energy()}")
+    steps = sim.steps_until_repeat()
+    print(f"simulation repeasts in {steps} steps")
 
 
 if __name__ == "__main__":
