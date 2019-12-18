@@ -2,7 +2,9 @@
 https://adventofcode.com/2019/day/12
 """
 
+from functools import reduce
 from itertools import combinations
+from math import gcd
 import re
 from typing import List
 
@@ -75,50 +77,56 @@ class Simulation:
 
     def step(self):
         """Run a single step of the simulation."""
+        for dim in ('x', 'y', 'z'):
+            self.step_dimension(dim)
+
+    def step_dimension(self, dim):
+        """Run a single step of the simulation in one dimension (x, y, z)."""
         # Update the velocity of each moon by applying gravity.
-        # Each body is pulled toward each other body by 1 on each (x, y) axis
         for body1, body2 in combinations(self.bodies, 2):
+            pos1 = getattr(body1.position, dim)
+            pos2 = getattr(body2.position, dim)
             # adjust velocity based on x positions
-            if body1.position.x < body2.position.x:
-                body1.velocity.x += 1
-                body2.velocity.x -= 1
-            elif body1.position.x > body2.position.x:
-                body1.velocity.x -= 1
-                body2.velocity.x += 1
-
-            # adjust velocity based on y positions
-            if body1.position.y < body2.position.y:
-                body1.velocity.y += 1
-                body2.velocity.y -= 1
-            elif body1.position.y > body2.position.y:
-                body1.velocity.y -= 1
-                body2.velocity.y += 1
-
-            # adjust velocity based on z positions
-            if body1.position.z < body2.position.z:
-                body1.velocity.z += 1
-                body2.velocity.z -= 1
-            elif body1.position.z > body2.position.z:
-                body1.velocity.z -= 1
-                body2.velocity.z += 1
+            if pos1 < pos2:
+                setattr(body1.velocity, dim, getattr(body1.velocity, dim) + 1)
+                setattr(body2.velocity, dim, getattr(body2.velocity, dim) - 1)
+            elif pos1 > pos2:
+                setattr(body1.velocity, dim, getattr(body1.velocity, dim) - 1)
+                setattr(body2.velocity, dim, getattr(body2.velocity, dim) + 1)
 
         # Update the position of each body by applying velocity
         for body in self.bodies:
-            body.position += body.velocity
+            setattr(body.position, dim, getattr(body.position, dim) + getattr(body.velocity, dim))
 
     def total_energy(self):
         """Return the total energy in the system."""
         return sum(body.total_energy() for body in self.bodies)
 
     def steps_until_repeat(self):
-        """Find the first step that repeats any previous step."""
-        start = hash(tuple(self.bodies))
-        index = 0
-        while True:
-            self.step()
-            index += 1
-            if hash(tuple(self.bodies)) == start:
-                return index
+        """Find the first step that repeats any previous step.
+
+        As an optimization, find the repetition cycle of each dimension
+        indepently, then the total is the LCM of all dimensional cycles.
+        """
+        dim_steps = {}
+        for dimension in ('x', 'y', 'z'):
+            # Find steps before repeat for this dimension
+            start = hash(tuple(self.bodies))
+            index = 0
+            while True:
+                self.step_dimension(dimension)
+                index += 1
+                if hash(tuple(self.bodies)) == start:
+                    dim_steps[dimension] = index
+                    print(f"dim {dimension} repeats in {index}")
+                    break
+
+        return lcm(dim_steps.values())
+
+
+def lcm(denoms):
+    """Return the Least Common Multiple of a set of integers."""
+    return reduce(lambda a, b: a*b // gcd(a, b), denoms)
 
 
 def parse_ints(text: str) -> List[int]:
@@ -254,4 +262,4 @@ def main():
 if __name__ == "__main__":
     test1()
     test2()
-    main()
+    # main()
