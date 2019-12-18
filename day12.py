@@ -16,42 +16,11 @@ INPUT = """
 """
 
 
-class Point:
-    """Point represents position or velocity in 3d space."""
-
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def __repr__(self):
-        return f"({self.x},{self.y},{self.z})"
-
-    def __eq__(self, o):
-        return all((
-            self.x == o.x,
-            self.y == o.y,
-            self.z == o.z,
-        ))
-
-    def __iadd__(self, o):
-        self.x += o.x
-        self.y += o.y
-        self.z += o.z
-        return self
-
-    def __hash__(self):
-        return hash((self.x, self.y, self.z))
-
-    def sumabs(self):
-        return sum((abs(self.x), abs(self.y), abs(self.z)))
-
-
 class Body:
-    def __init__(self, position: Point, velocity: Point = None):
+    def __init__(self, position, velocity=None):
         self.position = position
         if not velocity:
-            velocity = Point(0, 0, 0)
+            velocity = [0, 0, 0]
         self.velocity = velocity
 
     def __repr__(self):
@@ -61,14 +30,16 @@ class Body:
         return self.position == o.position and self.velocity == o.velocity
 
     def __hash__(self):
-        return hash((self.position, self.velocity))
+        return hash((tuple(self.position), tuple(self.velocity)))
 
     def total_energy(self):
-        return self.position.sumabs() * self.velocity.sumabs()
+        p = sum(abs(val) for val in self.position)
+        v = sum(abs(val) for val in self.velocity)
+        return p * v
 
 
 class Simulation:
-    def __init__(self, starts: List[Point]):
+    def __init__(self, starts: List[list]):
         self.bodies = [Body(start) for start in starts]
 
     def stepn(self, n):
@@ -77,26 +48,24 @@ class Simulation:
 
     def step(self):
         """Run a single step of the simulation."""
-        for dim in ('x', 'y', 'z'):
+        for dim in range(3):
             self.step_dimension(dim)
 
     def step_dimension(self, dim):
-        """Run a single step of the simulation in one dimension (x, y, z)."""
+        """Run a single step of the simulation in one dimension (0, 1, 2)."""
         # Update the velocity of each moon by applying gravity.
         for body1, body2 in combinations(self.bodies, 2):
-            pos1 = getattr(body1.position, dim)
-            pos2 = getattr(body2.position, dim)
             # adjust velocity based on x positions
-            if pos1 < pos2:
-                setattr(body1.velocity, dim, getattr(body1.velocity, dim) + 1)
-                setattr(body2.velocity, dim, getattr(body2.velocity, dim) - 1)
-            elif pos1 > pos2:
-                setattr(body1.velocity, dim, getattr(body1.velocity, dim) - 1)
-                setattr(body2.velocity, dim, getattr(body2.velocity, dim) + 1)
+            if body1.position[dim] < body2.position[dim]:
+                body1.velocity[dim] += 1
+                body2.velocity[dim] -= 1
+            elif body1.position[dim] > body2.position[dim]:
+                body1.velocity[dim] -= 1
+                body2.velocity[dim] += 1
 
         # Update the position of each body by applying velocity
         for body in self.bodies:
-            setattr(body.position, dim, getattr(body.position, dim) + getattr(body.velocity, dim))
+            body.position[dim] += body.velocity[dim]
 
     def total_energy(self):
         """Return the total energy in the system."""
@@ -109,7 +78,7 @@ class Simulation:
         indepently, then the total is the LCM of all dimensional cycles.
         """
         dim_steps = {}
-        for dimension in ('x', 'y', 'z'):
+        for dimension in range(3):
             # Find steps before repeat for this dimension
             start = hash(tuple(self.bodies))
             index = 0
@@ -130,18 +99,18 @@ def lcm(denoms):
 
 
 def parse_ints(text: str) -> List[int]:
-    return (int(num) for num in re.findall(r"-?\d+", text))
+    return [int(num) for num in re.findall(r"-?\d+", text)]
 
 
-def parse_start_positions(text) -> List[Point]:
+def parse_start_positions(text) -> List[list]:
     lines = (line.strip() for line in text.strip().split("\n"))
-    return [Point(*parse_ints(line)) for line in lines]
+    return [parse_ints(line) for line in lines]
 
 
 def parse_want_bodies(text) -> List[Body]:
     lines = (line.strip() for line in text.strip().split("\n"))
     numbers = (list(parse_ints(line)) for line in lines)
-    return [Body(Point(*nums[:3]), Point(*nums[3:])) for nums in numbers]
+    return [Body(nums[:3], nums[3:]) for nums in numbers]
 
 
 def test1():
@@ -261,5 +230,5 @@ def main():
 
 if __name__ == "__main__":
     test1()
-    test2()
-    # main()
+    # test2()
+    main()
