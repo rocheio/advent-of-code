@@ -3,6 +3,8 @@ https://adventofcode.com/2019/day/14
 """
 
 from collections import defaultdict
+import math
+from queue import Queue
 
 
 MAX_ORE = 1000000000000
@@ -36,28 +38,39 @@ def get_min_reaction(reactions, chemical):
 
 def ore_for_fuel(reactions):
     # Create a map of {chemical: quantity} on hand
-    # Use negative numbers to represent desired amounts
-    chemicals = defaultdict(lambda: 0)
-    chemicals["FUEL"] -= 1
+    # ORE is tracked separately from all other chems
+    stock = defaultdict(int)
+    ore_needed = 0
+    orders = Queue()
+    orders.put({"chemical": "FUEL", "quantity": 1})
 
     # Work "backwards" from desired chemicals to ingredients using
     # reactions until only ORE is left which we have infinite of.
-    while True:
-        # Find chemicals we still need to convert
-        need_chems = {
-            chem: quant for chem, quant in chemicals.items()
-            if chem != "ORE" and quant < 0
-        }
-        if not need_chems:
-            return chemicals["ORE"] * -1
+    while not orders.empty():
+        order = orders.get()
 
-        # Look for reactions that could create the chemicals we want
-        for chem, quant in need_chems.items():
-            output, inputs = get_min_reaction(reactions, chem)
-            # "perform" the reaction and now want ingredients
-            chemicals[chem] += output[1]
-            for rchem, rquant in inputs:
-                chemicals[rchem] -= rquant
+        # account for ORE separately
+        if order["chemical"] == "ORE":
+            ore_needed += order["quantity"]
+            continue
+
+        # use stock if it already exists
+        if stock[order["chemical"]] >= order["quantity"]:
+            stock[order["chemical"]] -= order["quantity"]
+            continue
+
+        # otherwise, put in an order to make more
+        needed = order["quantity"] - stock[order["chemical"]]
+        output, inputs = get_min_reaction(reactions, order["chemical"])
+        batches = math.ceil(needed / output[1])
+        for chem, quant in inputs:
+            orders.put({"chemical": chem, "quantity": quant * batches})
+
+        # add leftovers to stock
+        leftover = batches * output[1] - needed
+        stock[output[0]] = leftover
+
+    return ore_needed
 
 
 def max_fuel(reactions):
