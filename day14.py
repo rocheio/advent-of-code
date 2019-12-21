@@ -36,13 +36,13 @@ def get_min_reaction(reactions, chemical):
     return match, reactions[match]
 
 
-def ore_for_fuel(reactions):
+def ore_for_fuel(reactions, want_fuel=1):
     # Create a map of {chemical: quantity} on hand
     # ORE is tracked separately from all other chems
     stock = defaultdict(int)
     ore_needed = 0
     orders = Queue()
-    orders.put({"chemical": "FUEL", "quantity": 1})
+    orders.put({"chemical": "FUEL", "quantity": want_fuel})
 
     # Work "backwards" from desired chemicals to ingredients using
     # reactions until only ORE is left which we have infinite of.
@@ -74,8 +74,18 @@ def ore_for_fuel(reactions):
 
 
 def max_fuel(reactions):
-    rate = ore_for_fuel(reactions)
-    return MAX_ORE / rate
+    """Run a binary search to see how much fuel can be made with MAX_ORE."""
+    min_fuel = 0
+    max_fuel = 100000000
+    while (max_fuel - min_fuel) > 1:
+        pointer = (max_fuel + min_fuel) // 2
+        ore = ore_for_fuel(reactions, pointer)
+        if ore <= MAX_ORE:
+            min_fuel = pointer
+        else:
+            max_fuel = pointer
+
+    return min_fuel
 
 
 def test():
@@ -113,7 +123,7 @@ def test():
     """
     reactions = parse_reactions(formulas)
     assert ore_for_fuel(reactions) == 13312
-    # assert max_fuel(reactions) == 82892753
+    assert max_fuel(reactions) == 82892753
 
     formulas = """
         2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
@@ -129,7 +139,9 @@ def test():
         1 VJHF, 6 MNCFX => 4 RFSQX
         176 ORE => 6 VJHF
     """
-    assert ore_for_fuel(parse_reactions(formulas)) == 180697
+    reactions = parse_reactions(formulas)
+    assert ore_for_fuel(reactions) == 180697
+    assert max_fuel(reactions) == 5586022
 
     formulas = """
         171 ORE => 8 CNZTR
@@ -150,15 +162,16 @@ def test():
         7 XCVML => 6 RJRHP
         5 BHXH, 4 VRPVC => 5 LTCX
     """
-    assert ore_for_fuel(parse_reactions(formulas)) == 2210736
+    reactions = parse_reactions(formulas)
+    assert ore_for_fuel(reactions) == 2210736
+    assert max_fuel(reactions) == 460664
 
 
 def main():
     with open("data/day14.txt", "r") as file:
         formulas = file.read()
     reactions = parse_reactions(formulas)
-    ore = ore_for_fuel(reactions)
-    print(f"ore required: {ore}")
+    print(f"max fuel from ore is: {max_fuel(reactions)}")
 
 
 if __name__ == "__main__":
