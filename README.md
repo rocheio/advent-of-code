@@ -1,9 +1,17 @@
-# Advent of Code 2019
+# Advent of Code
 
-https://adventofcode.com/2019
+https://adventofcode.com
+
+Solutions to Advent of Code problems.
+
+The 2019 folder was actually done in 2019, and the rest were all done in 2023.
 
 ## Setup
 
 ```sh
-python3 day1.py  # and so on
+python3 --version
+# Python 3.9.6
+
+python3 -m venv venv
+. venv/bin/activate
 ```
