@@ -1,7 +1,6 @@
 """https://adventofcode.com/2015/day/3"""
 
 
-
 def houses_visited(moves: str) -> int:
     """
     Santa is delivering presents to an infinite two-dimensional grid of houses.
