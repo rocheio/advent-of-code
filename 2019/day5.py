@@ -45,9 +45,9 @@ def process(program, inputval=None):
 
         # opcodes for addition or multiplication
         if opcode in (1, 2):
-            val1 = getvalue(program, index+1, param1_mode)
-            val2 = getvalue(program, index+2, param2_mode)
-            dest = getvalue(program, index+3, IMMEDIATE_MODE)
+            val1 = getvalue(program, index + 1, param1_mode)
+            val2 = getvalue(program, index + 2, param2_mode)
+            dest = getvalue(program, index + 3, IMMEDIATE_MODE)
 
             if opcode == 1:
                 program[dest] = val1 + val2
@@ -59,7 +59,7 @@ def process(program, inputval=None):
 
         # opcode for input
         if opcode == 3:
-            dest = getvalue(program, index+1, IMMEDIATE_MODE)
+            dest = getvalue(program, index + 1, IMMEDIATE_MODE)
             program[dest] = inputval
 
             index += 2
@@ -67,15 +67,15 @@ def process(program, inputval=None):
 
         # opcode for output
         if opcode == 4:
-            outputval = getvalue(program, index+1, param1_mode)
+            outputval = getvalue(program, index + 1, param1_mode)
 
             index += 2
             continue
 
         # opcodes for jump-if-true / jump-if-false
         if opcode in (5, 6):
-            val1 = getvalue(program, index+1, param1_mode)
-            val2 = getvalue(program, index+2, param2_mode)
+            val1 = getvalue(program, index + 1, param1_mode)
+            val2 = getvalue(program, index + 2, param2_mode)
 
             # Should jump; update instruction pointer directly
             if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
@@ -88,9 +88,9 @@ def process(program, inputval=None):
 
         # opcode for less than / equal to
         if opcode in (7, 8):
-            val1 = getvalue(program, index+1, param1_mode)
-            val2 = getvalue(program, index+2, param2_mode)
-            dest = getvalue(program, index+3, IMMEDIATE_MODE)
+            val1 = getvalue(program, index + 1, param1_mode)
+            val2 = getvalue(program, index + 2, param2_mode)
+            dest = getvalue(program, index + 3, IMMEDIATE_MODE)
 
             # Default 0 (False), set to 1 if True
             program[dest] = 0
@@ -108,18 +108,62 @@ def process(program, inputval=None):
 def test():
     # programs defined by question
     # programs that return 1 if true, 0 if false
-    equal_8 = [3,9,8,9,10,9,4,9,99,-1,8]
-    less_than_8 = [3,9,7,9,10,9,4,9,99,-1,8]
-    equal_8_imm_mode = [3,3,1108,-1,8,3,4,3,99]
-    less_than_8_imm_mode = [3,3,1107,-1,8,3,4,3,99]
+    equal_8 = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
+    less_than_8 = [3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8]
+    equal_8_imm_mode = [3, 3, 1108, -1, 8, 3, 4, 3, 99]
+    less_than_8_imm_mode = [3, 3, 1107, -1, 8, 3, 4, 3, 99]
     # programs that return 0 if input is 0, 1 otherwise
-    nonzero = [3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9]
-    nonzero_imm_mode = [3,3,1105,-1,9,1101,0,0,12,4,12,99,1]
+    nonzero = [3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9]
+    nonzero_imm_mode = [3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1]
     # big program for <8, =8, or >8
     compare_to_8 = [
-        3,21,1008,21,8,20,1005,20,22,107,8,21,20,1006,20,31,
-        1106,0,36,98,0,0,1002,21,125,20,4,20,1105,1,46,104,
-        999,1105,1,46,1101,1000,1,20,4,20,1105,1,46,98,99
+        3,
+        21,
+        1008,
+        21,
+        8,
+        20,
+        1005,
+        20,
+        22,
+        107,
+        8,
+        21,
+        20,
+        1006,
+        20,
+        31,
+        1106,
+        0,
+        36,
+        98,
+        0,
+        0,
+        1002,
+        21,
+        125,
+        20,
+        4,
+        20,
+        1105,
+        1,
+        46,
+        104,
+        999,
+        1105,
+        1,
+        46,
+        1101,
+        1000,
+        1,
+        20,
+        4,
+        20,
+        1105,
+        1,
+        46,
+        98,
+        99,
     ]
 
     # test cases
@@ -149,7 +193,7 @@ def main():
     # Convert the text program into a list of integers (Intcode)
     with open("data/day5.txt", "r") as file:
         text = file.read().strip()
-    program = [int(number) for number in text.split(',')]
+    program = [int(number) for number in text.split(",")]
 
     output = process(program, inputval=5)
     print(f"answer is: {output}")

@@ -2,6 +2,7 @@
 https://adventofcode.com/2019/day/6
 """
 
+
 def new_orbit_map(orbit_paths):
     """Return a map of {orbiting obj} -> {obj it orbits} from text."""
     orbit_map = {}  # orbiting object -> object it orbits
@@ -50,8 +51,8 @@ def path_to_obj(orbit_map, start, end):
         first_shared = val1
 
     # Create the full path from [start -> first_shared -> end]
-    path = path1[:path1.index(first_shared)+1]
-    path += list(reversed(path2[:path2.index(first_shared)]))
+    path = path1[: path1.index(first_shared) + 1]
+    path += list(reversed(path2[: path2.index(first_shared)]))
     return path
 
 

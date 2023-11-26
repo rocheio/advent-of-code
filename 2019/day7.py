@@ -13,6 +13,7 @@ IMMEDIATE_MODE = 1
 
 class Amplifier:
     """An instance of a program that can accept inputs and process many times."""
+
     def __init__(self, program):
         self.program = deepcopy(program)
         self.inputs = []
@@ -53,9 +54,9 @@ class Amplifier:
 
             # opcodes for addition or multiplication
             if opcode in (1, 2):
-                val1 = self.getvalue(self.index+1, param1_mode)
-                val2 = self.getvalue(self.index+2, param2_mode)
-                dest = self.getvalue(self.index+3, IMMEDIATE_MODE)
+                val1 = self.getvalue(self.index + 1, param1_mode)
+                val2 = self.getvalue(self.index + 2, param2_mode)
+                dest = self.getvalue(self.index + 3, IMMEDIATE_MODE)
 
                 if opcode == 1:
                     self.program[dest] = val1 + val2
@@ -67,7 +68,7 @@ class Amplifier:
 
             # opcode for input
             if opcode == 3:
-                dest = self.getvalue(self.index+1, IMMEDIATE_MODE)
+                dest = self.getvalue(self.index + 1, IMMEDIATE_MODE)
                 self.program[dest] = self.inputs.pop(0)
 
                 self.index += 2
@@ -75,14 +76,14 @@ class Amplifier:
 
             # opcode for output
             if opcode == 4:
-                value = self.getvalue(self.index+1, param1_mode)
+                value = self.getvalue(self.index + 1, param1_mode)
                 self.index += 2
                 return value
 
             # opcodes for jump-if-true / jump-if-false
             if opcode in (5, 6):
-                val1 = self.getvalue(self.index+1, param1_mode)
-                val2 = self.getvalue(self.index+2, param2_mode)
+                val1 = self.getvalue(self.index + 1, param1_mode)
+                val2 = self.getvalue(self.index + 2, param2_mode)
 
                 # Should jump; update instruction pointer directly
                 if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
@@ -95,9 +96,9 @@ class Amplifier:
 
             # opcode for less than / equal to
             if opcode in (7, 8):
-                val1 = self.getvalue(self.index+1, param1_mode)
-                val2 = self.getvalue(self.index+2, param2_mode)
-                dest = self.getvalue(self.index+3, IMMEDIATE_MODE)
+                val1 = self.getvalue(self.index + 1, param1_mode)
+                val2 = self.getvalue(self.index + 2, param2_mode)
+                dest = self.getvalue(self.index + 3, IMMEDIATE_MODE)
 
                 # Default 0 (False), set to 1 if True
                 self.program[dest] = 0
@@ -116,7 +117,7 @@ def best_phase_settings(program):
     """Return the best phase settings for a 5-amp relay of a program."""
     calcs = {
         settings: thruster_signal(program, settings)
-        for settings in permutations(range(5,10))
+        for settings in permutations(range(5, 10))
     }
     return max(calcs, key=calcs.get)
 
@@ -149,22 +150,103 @@ def thruster_signal(program, phase_settings):
 
 def test():
     program = [
-        3,26,1001,26,-4,26,3,27,1002,27,2,27,1,27,26,
-        27,4,27,1001,28,-1,28,1005,28,6,99,0,0,5
+        3,
+        26,
+        1001,
+        26,
+        -4,
+        26,
+        3,
+        27,
+        1002,
+        27,
+        2,
+        27,
+        1,
+        27,
+        26,
+        27,
+        4,
+        27,
+        1001,
+        28,
+        -1,
+        28,
+        1005,
+        28,
+        6,
+        99,
+        0,
+        0,
+        5,
     ]
     best = best_phase_settings(program)
     max_signal = thruster_signal(program, best)
-    assert best == (9,8,7,6,5)
+    assert best == (9, 8, 7, 6, 5)
     assert max_signal == 139629729
 
     program = [
-        3,52,1001,52,-5,52,3,53,1,52,56,54,1007,54,5,55,1005,55,26,1001,54,
-        -5,54,1105,1,12,1,53,54,53,1008,54,0,55,1001,55,1,55,2,53,55,53,4,
-        53,1001,56,-1,56,1005,56,6,99,0,0,0,0,10
+        3,
+        52,
+        1001,
+        52,
+        -5,
+        52,
+        3,
+        53,
+        1,
+        52,
+        56,
+        54,
+        1007,
+        54,
+        5,
+        55,
+        1005,
+        55,
+        26,
+        1001,
+        54,
+        -5,
+        54,
+        1105,
+        1,
+        12,
+        1,
+        53,
+        54,
+        53,
+        1008,
+        54,
+        0,
+        55,
+        1001,
+        55,
+        1,
+        55,
+        2,
+        53,
+        55,
+        53,
+        4,
+        53,
+        1001,
+        56,
+        -1,
+        56,
+        1005,
+        56,
+        6,
+        99,
+        0,
+        0,
+        0,
+        0,
+        10,
     ]
     best = best_phase_settings(program)
     max_signal = thruster_signal(program, best)
-    assert best == (9,7,8,5,6)
+    assert best == (9, 7, 8, 5, 6)
     assert max_signal == 18216
 
 
@@ -172,7 +254,7 @@ def main():
     # Convert the text program into a list of integers (Intcode)
     with open("data/day7.txt", "r") as file:
         text = file.read().strip()
-    program = [int(number) for number in text.split(',')]
+    program = [int(number) for number in text.split(",")]
 
     # Possible sequences are [0,1,2,3,4] in any order
     best = best_phase_settings(program)

@@ -67,34 +67,34 @@ class Computer:
 
             # opcodes for addition or multiplication
             if opcode in (1, 2):
-                val1 = self.get_value(self.index+1, param1_mode)
-                val2 = self.get_value(self.index+2, param2_mode)
+                val1 = self.get_value(self.index + 1, param1_mode)
+                val2 = self.get_value(self.index + 2, param2_mode)
 
                 if opcode == 1:
                     total = val1 + val2
                 elif opcode == 2:
                     total = val1 * val2
 
-                self.set_value(self.index+3, param3_mode, total)
+                self.set_value(self.index + 3, param3_mode, total)
                 self.index += 4
                 continue
 
             # opcode for input
             if opcode == 3:
-                self.set_value(self.index+1, param1_mode, self.inputs.pop(0))
+                self.set_value(self.index + 1, param1_mode, self.inputs.pop(0))
                 self.index += 2
                 continue
 
             # opcode for output
             if opcode == 4:
-                outputs += [self.get_value(self.index+1, param1_mode)]
+                outputs += [self.get_value(self.index + 1, param1_mode)]
                 self.index += 2
                 continue
 
             # opcodes for jump-if-true / jump-if-false
             if opcode in (5, 6):
-                val1 = self.get_value(self.index+1, param1_mode)
-                val2 = self.get_value(self.index+2, param2_mode)
+                val1 = self.get_value(self.index + 1, param1_mode)
+                val2 = self.get_value(self.index + 2, param2_mode)
 
                 # Should jump; update instruction pointer directly
                 if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
@@ -107,8 +107,8 @@ class Computer:
 
             # opcode for less than / equal to
             if opcode in (7, 8):
-                val1 = self.get_value(self.index+1, param1_mode)
-                val2 = self.get_value(self.index+2, param2_mode)
+                val1 = self.get_value(self.index + 1, param1_mode)
+                val2 = self.get_value(self.index + 2, param2_mode)
 
                 # Default 0 (False), set to 1 if True
                 result = 0
@@ -117,13 +117,13 @@ class Computer:
                 elif opcode == 8 and val1 == val2:
                     result = 1
 
-                self.set_value(self.index+3, param3_mode, result)
+                self.set_value(self.index + 3, param3_mode, result)
                 self.index += 4
                 continue
 
             # opcode for relative base offset
             if opcode == 9:
-                self.relative_base += self.get_value(self.index+1, param1_mode)
+                self.relative_base += self.get_value(self.index + 1, param1_mode)
                 self.index += 2
                 continue
 
@@ -131,20 +131,20 @@ class Computer:
 
 
 def test():
-    program = [3,9,8,9,10,9,4,9,99,-1,8]
+    program = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
     computer = Computer(program)
     computer.inputs += [8]
     assert computer.process()[0] == 1
 
-    program = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]
+    program = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
     output = Computer(program).process()
     assert output == program
 
-    program = [1102,34915192,34915192,7,4,7,99,0]
+    program = [1102, 34915192, 34915192, 7, 4, 7, 99, 0]
     output = Computer(program).process()
     assert len(str(output[0])) == 16
 
-    program = [104,1125899906842624,99]
+    program = [104, 1125899906842624, 99]
     output = Computer(program).process()
     assert output[0] == 1125899906842624
 
@@ -153,7 +153,7 @@ def main():
     # Convert the text program into a list of integers (Intcode)
     with open("data/day9.txt", "r") as file:
         text = file.read().strip()
-    program = [int(number) for number in text.split(',')]
+    program = [int(number) for number in text.split(",")]
 
     computer = Computer(program)
     computer.inputs += [2]

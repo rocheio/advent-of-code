@@ -59,7 +59,7 @@ def closest_point(src, dests):
     """Return the closest (x, y) to src from a set of dests."""
     distances = {}
     for dest in dests:
-        distances[dest] = math.sqrt((dest[0] - src[0])**2 + (dest[1] - src[1])**2)
+        distances[dest] = math.sqrt((dest[0] - src[0]) ** 2 + (dest[1] - src[1]) ** 2)
     return min(distances, key=distances.get)
 
 

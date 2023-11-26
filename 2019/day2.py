@@ -13,9 +13,9 @@ def process(program):
             # opcode to exit normally
             break
 
-        val1 = program[program[index+1]]
-        val2 = program[program[index+2]]
-        dest = program[index+3]
+        val1 = program[program[index + 1]]
+        val2 = program[program[index + 2]]
+        dest = program[index + 3]
 
         if opcode == 1:
             program[dest] = val1 + val2
@@ -55,11 +55,14 @@ def find_inputs(program, want_output):
 
 def test():
     testcases = [
-        ([1,0,0,0,99],[2,0,0,0,99]),
-        ([2,3,0,3,99],[2,3,0,6,99]),
-        ([2,4,4,5,99,0],[2,4,4,5,99,9801]),
-        ([1,1,1,4,99,5,6,0,99],[30,1,1,4,2,5,6,0,99]),
-        ([1,9,10,3,2,3,11,0,99,30,40,50], [3500,9,10,70,2,3,11,0,99,30,40,50]),
+        ([1, 0, 0, 0, 99], [2, 0, 0, 0, 99]),
+        ([2, 3, 0, 3, 99], [2, 3, 0, 6, 99]),
+        ([2, 4, 4, 5, 99, 0], [2, 4, 4, 5, 99, 9801]),
+        ([1, 1, 1, 4, 99, 5, 6, 0, 99], [30, 1, 1, 4, 2, 5, 6, 0, 99]),
+        (
+            [1, 9, 10, 3, 2, 3, 11, 0, 99, 30, 40, 50],
+            [3500, 9, 10, 70, 2, 3, 11, 0, 99, 30, 40, 50],
+        ),
     ]
     for program, expected in testcases:
         process(program)
@@ -70,7 +73,7 @@ def main():
     # Convert the text program into a list of integers (Intcode)
     with open("data/day2.txt", "r") as file:
         text = file.read().strip()
-    program = [int(number) for number in text.split(',')]
+    program = [int(number) for number in text.split(",")]
 
     # Find the noun / verb inputs that produce the wanted output
     noun, verb = find_inputs(program, want_output=19690720)

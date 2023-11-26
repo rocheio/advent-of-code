@@ -25,7 +25,7 @@ def maybe_valid_password(number):
 
         previous = current
 
-    return (2 in count_repeatings)
+    return 2 in count_repeatings
 
 
 def test():
@@ -37,7 +37,7 @@ def test():
 def main():
     potential_passwords = []
     valid_range = [int(val) for val in PUZZLE_INPUT.split("-")]
-    for number in range(valid_range[0], valid_range[1]+1):
+    for number in range(valid_range[0], valid_range[1] + 1):
         if maybe_valid_password(number):
             potential_passwords += [number]
     print(f"total number of potential passwords is: {len(potential_passwords)}")

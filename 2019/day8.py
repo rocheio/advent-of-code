@@ -10,12 +10,12 @@ TRANSPARENT = "2"
 
 def chunks(iterable, n):
     """Return list of iterable split into list of evenly n-sized iterables."""
-    return [iterable[i:i+n] for i in range(0, len(iterable), n)]
+    return [iterable[i : i + n] for i in range(0, len(iterable), n)]
 
 
 def decode_image(data, width, height):
     """Return a list of strings representing the fully decoded image."""
-    layers = [chunks(layer, width) for layer in chunks(data, width*height)]
+    layers = [chunks(layer, width) for layer in chunks(data, width * height)]
     output = []
     # Process all layers for each cell in the image
     for row in zip(*layers):
@@ -41,10 +41,7 @@ def test():
     data = "0222112222120000"
     width = 2
     height = 2
-    want = [
-        "01",
-        "10"
-    ]
+    want = ["01", "10"]
     assert decode_image(data, width, height) == want
 
 

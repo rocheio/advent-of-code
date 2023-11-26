@@ -83,15 +83,15 @@ class Computer:
 
         # opcodes for addition or multiplication
         if opcode in (1, 2):
-            val1 = self.get_value(self.index+1, param1_mode)
-            val2 = self.get_value(self.index+2, param2_mode)
+            val1 = self.get_value(self.index + 1, param1_mode)
+            val2 = self.get_value(self.index + 2, param2_mode)
 
             if opcode == 1:
                 total = val1 + val2
             elif opcode == 2:
                 total = val1 * val2
 
-            self.set_value(self.index+3, param3_mode, total)
+            self.set_value(self.index + 3, param3_mode, total)
             self.index += 4
             return
 
@@ -105,20 +105,20 @@ class Computer:
                 self.halted = True
                 return
 
-            self.set_value(self.index+1, param1_mode, inputval)
+            self.set_value(self.index + 1, param1_mode, inputval)
             self.index += 2
             return
 
         # opcode for output
         if opcode == 4:
-            self.outputs += [self.get_value(self.index+1, param1_mode)]
+            self.outputs += [self.get_value(self.index + 1, param1_mode)]
             self.index += 2
             return
 
         # opcodes for jump-if-true / jump-if-false
         if opcode in (5, 6):
-            val1 = self.get_value(self.index+1, param1_mode)
-            val2 = self.get_value(self.index+2, param2_mode)
+            val1 = self.get_value(self.index + 1, param1_mode)
+            val2 = self.get_value(self.index + 2, param2_mode)
 
             # Should jump; update instruction pointer directly
             if (opcode == 5 and val1 != 0) or (opcode == 6 and val1 == 0):
@@ -131,8 +131,8 @@ class Computer:
 
         # opcode for less than / equal to
         if opcode in (7, 8):
-            val1 = self.get_value(self.index+1, param1_mode)
-            val2 = self.get_value(self.index+2, param2_mode)
+            val1 = self.get_value(self.index + 1, param1_mode)
+            val2 = self.get_value(self.index + 2, param2_mode)
 
             # Default 0 (False), set to 1 if True
             result = 0
@@ -141,13 +141,13 @@ class Computer:
             elif opcode == 8 and val1 == val2:
                 result = 1
 
-            self.set_value(self.index+3, param3_mode, result)
+            self.set_value(self.index + 3, param3_mode, result)
             self.index += 4
             return
 
         # opcode for relative base offset
         if opcode == 9:
-            self.relative_base += self.get_value(self.index+1, param1_mode)
+            self.relative_base += self.get_value(self.index + 1, param1_mode)
             self.index += 2
             return
 
@@ -186,7 +186,7 @@ def run_robot(program):
 
         x = round(math.cos(math.radians(direction)))
         y = round(math.sin(math.radians(direction)))
-        position = (position[0]+x, position[1]+y)
+        position = (position[0] + x, position[1] + y)
         current_color = grid[position]
 
 
@@ -199,9 +199,9 @@ def print_grid(grid):
     max_y = max(grid, key=lambda item: item[1])[1]
 
     # Loop over grid adjusting for flipped Y perspective
-    for y in range(max_y, min_y-1, -1):
+    for y in range(max_y, min_y - 1, -1):
         row = ""
-        for x in range(min_x, max_x+1):
+        for x in range(min_x, max_x + 1):
             color = grid[(x, y)]
             if color == COLOR_BLACK:
                 row += " "
@@ -211,20 +211,20 @@ def print_grid(grid):
 
 
 def test():
-    program = [3,9,8,9,10,9,4,9,99,-1,8]
+    program = [3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8]
     computer = Computer(program)
     computer.inputs += [8]
     assert computer.process()[0] == 1
 
-    program = [109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99]
+    program = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
     output = Computer(program).process()
     assert output == program
 
-    program = [1102,34915192,34915192,7,4,7,99,0]
+    program = [1102, 34915192, 34915192, 7, 4, 7, 99, 0]
     output = Computer(program).process()
     assert len(str(output[0])) == 16
 
-    program = [104,1125899906842624,99]
+    program = [104, 1125899906842624, 99]
     output = Computer(program).process()
     assert output[0] == 1125899906842624
 
@@ -233,7 +233,7 @@ def main():
     # Convert the text program into a list of integers (Intcode)
     with open("data/day11.txt", "r") as file:
         text = file.read().strip()
-    program = [int(number) for number in text.split(',')]
+    program = [int(number) for number in text.split(",")]
     grid = run_robot(program)
     print_grid(grid)
 
